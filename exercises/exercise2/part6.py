@@ -1,11 +1,9 @@
 import cv2
 
-# path
 path = "images/gohan.jpg"
 
 file_name = path.split('/')
 
-# Using cv2.imread() method
 img = cv2.imread(path)
 
 hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)

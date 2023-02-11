@@ -1,11 +1,9 @@
 import cv2
 
-# path
 path = "images/gohan.jpg"
 
 file_name = path.split('/')
 
-# Using cv2.imread() method
 img = cv2.imread(path)
 
 (B, G, R) = cv2.split(img)

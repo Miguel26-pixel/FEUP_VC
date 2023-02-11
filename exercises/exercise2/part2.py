@@ -16,8 +16,6 @@ color = (255, 0, 0)
 
 thickness = 9
 
-# Using cv2.line() method
-# Draw a diagonal green line with thickness of 9 px
 img = cv2.line(img, start_point, end_point, color, thickness)
 
 start_point = (0, 100)
@@ -28,11 +26,8 @@ color = (0, 0, 255)
 
 thickness = 9
 
-# Using cv2.line() method
-# Draw a diagonal green line with thickness of 9 px
 img = cv2.line(img, start_point, end_point, color, thickness)
 
-# Displaying the image
 cv2.imshow('image', img)
 
 cv2.waitKey(0)
