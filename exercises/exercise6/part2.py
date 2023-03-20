@@ -11,11 +11,9 @@ img0 = cv2.imread(path)
 
 gray = cv2.cvtColor(img0, cv2.COLOR_BGR2GRAY)
 
-img = cv2.GaussianBlur(gray,(3,3),0)
-
-laplacian = cv2.Laplacian(img,cv2.CV_64F)
-sobelx = cv2.Sobel(img,cv2.CV_64F,1,0,ksize=5)  # x
-sobely = cv2.Sobel(img,cv2.CV_64F,0,1,ksize=5)  # y
+laplacian = cv2.Laplacian(gray,cv2.CV_64F)
+sobelx = cv2.Sobel(gray,cv2.CV_64F,1,0,ksize=5)  # x
+sobely = cv2.Sobel(gray,cv2.CV_64F,0,1,ksize=5)  # y
 
 combined = cv2.addWeighted(sobelx, 0.5, sobely, 0.5, 0)
 cv2.imshow('image',combined)
