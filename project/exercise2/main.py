@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+coords = []
+b = False
+
 def click_event(event, x, y, flags, params):
 
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -8,22 +11,23 @@ def click_event(event, x, y, flags, params):
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(img, str(x) + ',' +
-                    str(y), (0, 20), font,
-                    1, (255, 0, 0), 2)
+                    str(y), (x, y), font,
+                    0.5, (255, 0, 0), 2)
         cv2.imshow('image', img)
+        if len(coords)==1:
+            b = True
+        coords.append((x,y))
+        
+    if len(coords) == 2 and b:
+        result = distanceCalculate(coords[0], coords[1])
+        print("distance: " + str(result))
+        coords.pop()
+        coords.pop()
+        b = False
 
-    if event == cv2.EVENT_RBUTTONDOWN:
-        print(x, ' ', y)
-
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        b = img[y, x, 0]
-        g = img[y, x, 1]
-        r = img[y, x, 2]
-        cv2.putText(img, str(b) + ',' +
-                    str(g) + ',' + str(r),
-                    (0, 20), font, 1,
-                    (255, 255, 0), 2)
-        cv2.imshow('image', img)
+def distanceCalculate(p1, p2):
+    dis = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
+    return dis
 
 def detect_plane(img):
 
@@ -59,14 +63,14 @@ def detect_plane(img):
     cv2.imshow('image', img)
 
 
-img = cv2.imread('images/plane.jpg', 1)
+img = cv2.imread('images/gohan.jpg', 1)
 
 cv2.namedWindow("image", cv2.WINDOW_NORMAL)
 cv2.imshow("image", img)
 
 cv2.setMouseCallback('image', click_event)
 
-detect_plane(img)
+#detect_plane(img)
 
 cv2.waitKey(0)
 
