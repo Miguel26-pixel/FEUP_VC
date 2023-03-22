@@ -2,76 +2,80 @@ import cv2
 import numpy as np
 
 coords = []
-b = False
-
 def click_event(event, x, y, flags, params):
 
-    if event == cv2.EVENT_LBUTTONDOWN:
+    if event == cv2.EVENT_LBUTTONDOWN and len(coords) < 2:
         print(x, ' ', y)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(img, str(x) + ',' +
+        cv2.putText(img2, str(x) + ',' +
                     str(y), (x, y), font,
                     0.5, (255, 0, 0), 2)
-        cv2.imshow('image', img)
-        if len(coords)==1:
-            b = True
+        cv2.imshow('image', img2)
         coords.append((x,y))
-        
-    if len(coords) == 2 and b:
-        result = distanceCalculate(coords[0], coords[1])
-        print("distance: " + str(result))
-        coords.pop()
-        coords.pop()
-        b = False
+
+    if len(coords) == 2:
+        #result = distanceCalculate(coords[0], coords[1])
+        return coords
 
 def distanceCalculate(p1, p2):
     dis = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
     return dis
 
-def detect_plane(img):
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blur = cv2.medianBlur(gray, 5)
-    sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    sharpen = cv2.filter2D(blur, -1, sharpen_kernel)
-
-    # Threshold and morph close
-    thresh = cv2.threshold(sharpen, 160, 255, cv2.THRESH_BINARY_INV)[1]
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-    close = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-
-    # Find contours and filter using threshold area
-    cnts = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-
-    min_area = 100
-    max_area = 1500
-    image_number = 0
-    for c in cnts:
-        area = cv2.contourArea(c)
-        if area > min_area and area < max_area:
-            x,y,w,h = cv2.boundingRect(c)
-            ROI = img[y:y+h, x:x+w]
-            cv2.imwrite('ROI_{}.png'.format(image_number), ROI)
-            cv2.rectangle(img, (x, y), (x + w, y + h), (36,255,12), 2)
-            image_number += 1
-
-    cv2.imshow('sharpen', sharpen)
-    cv2.imshow('close', close)
-    cv2.imshow('thresh', thresh)
-    cv2.imshow('image', img)
-
-
-img = cv2.imread('images/gohan.jpg', 1)
+MIN_MATCH_COUNT = 10
 
 cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-cv2.imshow("image", img)
+img1 = cv2.imread('images/match_box01a_1.png')          
+img2 = cv2.imread('images/match_box01a_2.png') 
+cv2.imshow('image', img2)
 
 cv2.setMouseCallback('image', click_event)
 
-#detect_plane(img)
+cv2.waitKey()
 
+print(coords)
+if len(coords) == 2:
+    sift = cv2.SIFT_create()
+    kp1, des1 = sift.detectAndCompute(img1,None)
+    kp2, des2 = sift.detectAndCompute(img2,None)
+
+    # BFMatcher with default params
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(des1,des2,k=2)
+
+    matchesMask = [[0,0] for i in range(len(matches))]
+
+    good = []
+    for mat in matches:
+        m,n = mat
+        img1_idx = m.queryIdx
+
+        coord = kp1[img1_idx].pt
+        array_int = (int(coord[0]), int(coord[1]))
+        print("coords : " + str(coords))
+        print("coord : " + str(array_int))
+        if (array_int in coords):
+            good.append(m)
+    print("good : " + str(good))
+
+    if len(good)>0:
+        src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+        dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+        matchesMask = mask.ravel().tolist()
+        h,w = img1.shape
+        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+        dst = cv2.perspectiveTransform(pts,M)
+        img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
+
+
+        draw_params = dict(matchColor = (150,255,255),
+                        singlePointColor = None,
+                        matchesMask = matchesMask,
+                        flags = 2)
+        img3 = cv2.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
+
+        cv2.imshow("result",img3)
 cv2.waitKey(0)
-
 cv2.destroyAllWindows()
