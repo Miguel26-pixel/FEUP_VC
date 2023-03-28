@@ -40,23 +40,27 @@ if len(coords) == 2:
     kp1, des1 = sift.detectAndCompute(img1,None)
     kp2, des2 = sift.detectAndCompute(img2,None)
 
-    # BFMatcher with default params
-    bf = cv2.BFMatcher()
-    matches = bf.knnMatch(des1,des2,k=2)
+    # FLANN parameters
+    FLANN_INDEX_KDTREE = 0
+    index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+    search_params = dict(checks=50)   # or pass empty dictionary
 
+    flann = cv2.FlannBasedMatcher(index_params,search_params)
+
+    matches = flann.knnMatch(des1,des2,k=2)
     matchesMask = [[0,0] for i in range(len(matches))]
-
+    cv2.destroyWindow('image')
     good = []
     for mat in matches:
         m,n = mat
         img1_idx = m.queryIdx
-
         coord = kp1[img1_idx].pt
-        array_int = (int(coord[0]), int(coord[1]))
+        array_int = (round(coord[0]), round(coord[1]))
         print("coords : " + str(coords))
         print("coord : " + str(array_int))
-        if (array_int in coords):
+        if (array_int[0] == coords[0][0] or array_int[0] == coords[1][0]):
             good.append(m)
+
     print("good : " + str(good))
 
     if len(good)>0:
