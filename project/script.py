@@ -14,7 +14,7 @@ corners1 = cv2.goodFeaturesToTrack(
     marker1_gray, maxCorners=200, qualityLevel=0.15, minDistance=20
 )
 corners2 = cv2.goodFeaturesToTrack(
-    marker2_gray, maxCorners=200, qualityLevel=0.15, minDistance=20
+    marker2_gray, maxCorners=200, qualityLevel=0.15, minDistance=10
 )
 corners1 = np.int0(corners1)
 corners2 = np.int0(corners2)
@@ -40,6 +40,73 @@ print(len(corners))
 for i in corners:
     x, y = i.ravel()
     cv2.circle(scene, (x, y), 3, (0, 0, 255), -1)
+
+# match corners between the markers and the scene
+THRESHOLD = 30
+
+matched_corners1 = []
+for corner in corners:
+    min_distance = float("inf")
+    for template_corner in corners1:
+        distance = np.linalg.norm(corner - template_corner)
+        if distance < min_distance:
+            min_distance = distance
+            closest_corner = template_corner
+    if min_distance < THRESHOLD:
+        matched_corners1.append((corner, closest_corner))
+
+matched_corners2 = []
+for corner in corners:
+    min_distance = float("inf")
+    for template_corner in corners2:
+        distance = np.linalg.norm(corner - template_corner)
+        if distance < min_distance:
+            min_distance = distance
+            closest_corner = template_corner
+    if min_distance < THRESHOLD:
+        matched_corners2.append((corner, closest_corner))
+
+# Define colors for matched corners
+color1 = (0, 0, 255)  # red
+color2 = (0, 255, 0)  # green
+
+# Draw matched corners on scene image
+for corner_pair in matched_corners1:
+    cv2.circle(scene, tuple(corner_pair[0][0]), 5, color1, -1)
+for corner_pair in matched_corners2:
+    cv2.circle(scene, tuple(corner_pair[0][0]), 5, color2, -1)
+
+# Show the result
+cv2.imshow("Matched Corners", scene)
+print(matched_corners1)
+print(matched_corners2)
+
+# Compute homography for template 1
+marker1_homography, _ = cv2.findHomography(
+    np.array([pair[1] for pair in matched_corners1]),
+    np.array([pair[0] for pair in matched_corners1]),
+)
+
+# Compute homography for template 2
+marker2_homography, _ = cv2.findHomography(
+    np.array([pair[1] for pair in matched_corners2]),
+    np.array([pair[0] for pair in matched_corners2]),
+)
+
+print("Homography 1", marker1_homography)
+print("Homography 2", marker2_homography)
+
+
+marker_frontal1 = cv2.warpPerspective(
+    marker1, marker1_homography, (scene.shape[1], scene.shape[0])
+)
+cv2.imshow("frontal marker 1", marker_frontal1)
+
+marker_frontal2 = cv2.warpPerspective(
+    marker2, marker2_homography, (scene.shape[1], scene.shape[0])
+)
+cv2.imshow("frontal marker 2", marker_frontal2)
+
 
 cv2.imshow("image", scene)
 cv2.imshow("marker1", marker1)
