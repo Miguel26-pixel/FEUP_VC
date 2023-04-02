@@ -1,35 +1,55 @@
 import cv2
 import numpy as np
 
-
 scene = cv2.imread("./images/full.png")
-marker1 = cv2.imread("./images/marker1.png", cv2.IMREAD_GRAYSCALE)
-marker2 = cv2.imread("./images/marker2.png", cv2.IMREAD_GRAYSCALE)
+marker1 = cv2.imread("./images/marker1.png")
+marker2 = cv2.imread("./images/marker2.png")
 
-""" cv2.imshow("Scene", scene)
-cv2.imshow("Marker 1", marker1)
-cv2.imshow("Marker 2", marker2)
-"""
-
-# Define the corners of the template markers
-marker1_corners = [
-    (0, 0),
-    (marker1.shape[1], 0),
-    (marker1.shape[1], marker1.shape[0]),
-    (0, marker1.shape[0]),
-]
-
-marker2_corners = [
-    (0, 0),
-    (marker2.shape[1], 0),
-    (marker2.shape[1], marker2.shape[0]),
-    (0, marker2.shape[0]),
-]
-
-i = 0
+marker1_gray = cv2.cvtColor(marker1, cv2.COLOR_BGR2GRAY)
+marker2_gray = cv2.cvtColor(marker2, cv2.COLOR_BGR2GRAY)
 
 
-# Find the corners in the scene
+# find corners in markers
+corners1 = cv2.goodFeaturesToTrack(
+    marker1_gray, maxCorners=200, qualityLevel=0.15, minDistance=20
+)
+corners2 = cv2.goodFeaturesToTrack(
+    marker2_gray, maxCorners=200, qualityLevel=0.15, minDistance=20
+)
+corners1 = np.int0(corners1)
+corners2 = np.int0(corners2)
+
+for i in corners1:
+    x, y = i.ravel()
+    cv2.circle(marker1, (x, y), 3, (0, 0, 255), -1)
+
+for i in corners2:
+    x, y = i.ravel()
+    cv2.circle(marker2, (x, y), 3, (0, 0, 255), -1)
+
+
+# find corners in the scene
+scene_gray = cv2.cvtColor(scene, cv2.COLOR_BGR2GRAY)
+
+corners = cv2.goodFeaturesToTrack(
+    scene_gray, maxCorners=100, qualityLevel=0.15, minDistance=5
+)
+corners = np.int0(corners)
+print(len(corners))
+
+for i in corners:
+    x, y = i.ravel()
+    cv2.circle(scene, (x, y), 3, (0, 0, 255), -1)
+
+cv2.imshow("image", scene)
+cv2.imshow("marker1", marker1)
+cv2.imshow("marker2", marker2)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Code below would ask the user to select the corners
+""" # Find the corners in the scene
 # This is being done manually for now, as corner detectors were not having good results
 # Change to detectors or improve images quality
 def mouse_callback(event, x, y, flags, param):
@@ -61,7 +81,10 @@ cv2.setMouseCallback("image", mouse_callback)
 # Wait for 'q' to quit all windows
 KEY = -1
 while KEY != ord("q") and i < 8:
-    KEY = cv2.waitKey(0)
+    KEY = cv2.waitKey(0) """
+
+""" pts1 = []
+pts2 = []
 
 # Find the homography transformation between the template markers and the scene markers
 H1, _ = cv2.findHomography(np.float32(marker1_corners), pts1)
@@ -76,6 +99,7 @@ cv2.imshow("frontal marker 1", marker_frontal1)
 
 marker_frontal2 = cv2.warpPerspective(marker2, H2, (scene.shape[1], scene.shape[0]))
 cv2.imshow("frontal marker 2", marker_frontal2)
+ """
 
 cv2.waitKey(0)
 
