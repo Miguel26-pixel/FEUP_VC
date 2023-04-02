@@ -1,13 +1,10 @@
 from __future__ import print_function
 import cv2 as cv
 import numpy as np
-import argparse
-parser = argparse.ArgumentParser(description='Code for Feature Matching with FLANN tutorial.')
-parser.add_argument('--input1', help='Path to input image 1.', default='tuc.png')
-parser.add_argument('--input2', help='Path to input image 2.', default='scene_tuc.png')
-args = parser.parse_args()
-img_object = cv.imread(cv.samples.findFile(args.input1), cv.IMREAD_GRAYSCALE)
-img_scene = cv.imread(cv.samples.findFile(args.input2), cv.IMREAD_GRAYSCALE)
+
+
+img_object = cv.imread("tuc.png", cv.IMREAD_GRAYSCALE)
+img_scene = cv.imread("scene_tuc.png", cv.IMREAD_GRAYSCALE)
 if img_object is None or img_scene is None:
     print('Could not open or find the images!')
     exit(0)
