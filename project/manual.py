@@ -106,23 +106,48 @@ cv2.imshow("marker1", cropped_marker1)
 
 # Template matching
 
+
 scales = [0.5, 0.75, 1.0, 1.25, 1.5]
 
-for scale in scales:
+best_scale = 1.0
+best_match_val1 = -1
+best_match_val2 = -1
+best_top_left1 = None
+best_top_left2 = None
 
+for scale in scales:
     scaled_scene = cv2.resize(scene_gray, None, fx=scale, fy=scale)
 
     res1 = cv2.matchTemplate(scaled_scene, cropped_marker1, cv2.TM_CCOEFF_NORMED)
     res2 = cv2.matchTemplate(scaled_scene, cropped_marker2, cv2.TM_CCOEFF_NORMED)
 
     min_val1, max_val1, min_loc1, max_loc1 = cv2.minMaxLoc(res1)
+    min_val2, max_val2, min_loc2, max_loc2 = cv2.minMaxLoc(res2)
 
-    top_left1 = max_loc1
-    bottom_right1 = (top_left1[0] + w1, top_left1[1] + h1)
-    cv2.rectangle(scaled_scene, top_left1, bottom_right1, 255, 2)
+    if max_val1 > best_match_val1:
+        best_match_val1 = max_val1
+        best_top_left1 = max_loc1
+        best_scale = scale
 
-    cv2.imshow("template" + str(scale), scaled_scene)
+    if max_val2 > best_match_val2:
+        best_match_val2 = max_val2
+        best_top_left2 = max_loc2
 
+best_top_left1 = (
+    int(best_top_left1[0] / best_scale),
+    int(best_top_left1[1] / best_scale),
+)
+bottom_right1 = (best_top_left1[0] + w1, best_top_left1[1] + h1)
+cv2.rectangle(scene, best_top_left1, bottom_right1, (0, 255, 0), 2)
+
+best_top_left2 = (
+    int(best_top_left2[0] / best_scale),
+    int(best_top_left2[1] / best_scale),
+)
+bottom_right2 = (best_top_left2[0] + w2, best_top_left2[1] + h2)
+cv2.rectangle(scene, best_top_left2, bottom_right2, (0, 0, 255), 2)
+
+cv2.imshow("template", scene)
 
 cv2.waitKey(0)
 
