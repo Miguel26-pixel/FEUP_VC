@@ -3,13 +3,13 @@ import cv2 as cv
 import numpy as np
 
 
-img_object = cv.imread("tuc.png", cv.IMREAD_GRAYSCALE)
-img_scene = cv.imread("scene_tuc.png", cv.IMREAD_GRAYSCALE)
+img_object = cv.imread("./images/10_ouros.png", cv.IMREAD_GRAYSCALE)
+img_scene = cv.imread("./images/scene_.png", cv.IMREAD_GRAYSCALE)
 if img_object is None or img_scene is None:
     print('Could not open or find the images!')
     exit(0)
 #-- Step 1: Detect the keypoints using SIFT Detector, compute the descriptors
-sift = cv.SIFT_create()
+sift = cv.ORB_create()
 # find the keypoints and descriptors with SIFT
 keypoints_obj, descriptors_obj = sift.detectAndCompute(img_object,None)
 keypoints_scene, descriptors_scene = sift.detectAndCompute(img_scene,None)
