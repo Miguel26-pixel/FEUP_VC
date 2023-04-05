@@ -49,6 +49,8 @@ lane_lines = np.zeros_like(img)
 
 print(img.shape)
 
+white_mask = cv2.ximgproc.thinning(white_mask)
+
 # Display the output
 cv2.imshow('Original Image', img)
 # cv2.imshow('Masked Image', masked_img)

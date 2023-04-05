@@ -23,31 +23,21 @@ lower_white = np.array([200, 200, 200])
 upper_white = np.array([255, 255, 255])
 white_mask = cv2.inRange(masked_img, lower_white, upper_white)
 
-# Combine the edge and color masks
 combined_mask = cv2.bitwise_or(canny_img, white_mask)
 
 # Define the Hough transform parameters
 rho = 2
 theta = np.pi / 180
-threshold = 50
+threshold = 100
 min_line_len = 100
-max_line_gap = 50
+max_line_gap = 75
 
 # Run Hough on combined mask
-lines = cv2.HoughLinesP(combined_mask, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
+lines = cv2.HoughLinesP(white_mask, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
 
-# Create a black image for drawing the lane lines
-lane_lines = np.zeros_like(img)
-
-# # Check if any lines were detected
-# if lines is not None:
-#     # Reshape lines into the expected format for cv2.polylines()
-#     lines = np.array(lines).reshape((1, -1, 4))
-
-#     # Draw the lane lines on the black image
-#     cv2.polylines(lane_lines, lines, isClosed=False, color=(0, 0, 255), thickness=10)
-
-print(img.shape)
+for x in range(0, len(lines)):
+    for x1,y1,x2,y2 in lines[x]:
+        cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
 
 # Display the output
 cv2.imshow('Original Image', img)
@@ -55,6 +45,6 @@ cv2.imshow('Original Image', img)
 # cv2.imshow('Canny Image', canny_img)
 cv2.imshow('White Mask', white_mask) # best results
 # cv2.imshow('Combined Mask', combined_mask)
-#cv2.imshow('final', white_mask | gray_img)
+#cv2.imshow('lines', lines)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
