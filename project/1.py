@@ -27,6 +27,8 @@ for m,n in knn_matches:
         good_matches.append(m)
 
 
+
+
 #-- Draw matches
 img_matches = np.empty((max(img_object.shape[0], img_scene.shape[0]), img_object.shape[1]+img_scene.shape[1], 3), dtype=np.uint8)
 cv.drawMatches(img_object, keypoints_obj, img_scene, keypoints_scene, good_matches, img_matches, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
@@ -43,7 +45,10 @@ for i in range(len(good_matches)):
     scene[i,0] = keypoints_scene[good_matches[i].trainIdx].pt[0]
     scene[i,1] = keypoints_scene[good_matches[i].trainIdx].pt[1]
 
-H, _ =  cv.findHomography(obj, scene, cv.RANSAC)
+H, _ =  cv.findHomography(obj, scene, cv.RANSAC) # ---- RANSAC
+
+
+
 #-- Get the corners from the image_1 ( the object to be "detected" )
 obj_corners = np.empty((4,1,2), dtype=np.float32)
 obj_corners[0,0,0] = 0
