@@ -175,7 +175,7 @@ if len(coords) == 2:
                     str(round(result[1][1])), (round(result[1][0]), round(result[1][1])), font,
                     0.5, (255, 0, 0), 2)
         
-        cv2.putText(img3,"distance:" + str(round_half_up(distance,2)),(50,300),cv2.FONT_HERSHEY_COMPLEX,1,(255,0,0),2,cv2.LINE_AA)
+        cv2.putText(img3,"distance:" + str(round_half_up(distance,2)),(50,300),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0),2,cv2.LINE_AA)
 
         cv2.imshow("result",img3)
 cv2.waitKey(0)
