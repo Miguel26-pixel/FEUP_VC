@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 
-scene = cv2.imread("./images/full.png")
+scene = cv2.imread("images/full.png")
 scene_gray = cv2.cvtColor(scene, cv2.COLOR_BGR2GRAY)
-marker1 = cv2.imread("./images/marker1.png", cv2.IMREAD_GRAYSCALE)
-marker2 = cv2.imread("./images/marker2.png", cv2.IMREAD_GRAYSCALE)
+marker1 = cv2.imread("images/marker1.png", cv2.IMREAD_GRAYSCALE)
+marker2 = cv2.imread("images/marker2.png", cv2.IMREAD_GRAYSCALE)
 
 """ cv2.imshow("Scene", scene)
 cv2.imshow("Marker 1", marker1)
