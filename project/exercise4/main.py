@@ -21,8 +21,6 @@ def show_images(images, cmap=None):
 test_images = [plt.imread(path) for path in glob.glob('images/test_images/*.jpg')]
 
 
-# selecting only yellow and white colors in the images using the RGB channels 
-
 def select_rgb_white_yellow(image): 
     # white color mask
     lower = np.uint8([200, 200, 200])
