@@ -203,7 +203,7 @@ def draw_lane_lines(image, lines, color=[255, 0, 0], thickness=10):
     # image1 and image2 must be the same shape.
     return cv2.addWeighted(image, 1.0, line_image, 0.95, 0.0)
 
-def bresenham_line(x0, y0, x1, y1):
+def algorithm_line(x0, y0, x1, y1):
     dx, dy = abs(x1 - x0), abs(y1 - y0)
     sx, sy = 1 if x0 < x1 else -1, 1 if y0 < y1 else -1
     err = dx - dy
@@ -227,7 +227,7 @@ def draw_dotted_line(img, lines, color=(0, 255, 255), thickness=4, gap=10):
         print(line)
         x,y = line
         print(x,y)
-        points = bresenham_line(x[0], x[1], y[0], y[1])
+        points = algorithm_line(x[0], x[1], y[0], y[1])
         n_points = len(points)
         draw = True
         for i in range(n_points):
@@ -238,21 +238,32 @@ def draw_dotted_line(img, lines, color=(0, 255, 255), thickness=4, gap=10):
                 draw = not draw
     return cv2.addWeighted(image, 1.0, line_image, 0.95, 0.0)
                 
-        
-
+    
 
 lane_images = []
 for image, lines in zip(test_images, list_of_lines):
 
-    h,w,r = image.shape
-    lane_width_px = w*2/3
-    src = np.array([[200, 720], [1100, 720], [750, 470], [550, 470]], np.float32)
-    dst = np.array([[350, 720], [950, 720], [950, 0], [350, 0]], np.float32)
+    height,width,r = image.shape
+
+    src = np.float32([
+        [0.2*width, 0.8*height],
+        [0.8*width, 0.8*height],
+        [0, height],
+        [width, height]
+    ])
+
+    # Define the destination points for a bird's eye view
+    dst = np.float32([
+        [0.25*width, 0],
+        [0.75*width, 0],
+        [0.25*width, height],
+        [0.75*width, height]
+    ])
 
 
     M = cv2.getPerspectiveTransform(src, dst)
 
-    output = cv2.warpPerspective(draw_dotted_line(image, lane_lines(image, lines)), M, (w, h), flags=cv2.INTER_LINEAR)
+    output = cv2.warpPerspective(draw_dotted_line(image, lane_lines(image, lines)), M, (width, height), flags=cv2.INTER_LINEAR)
 
     lane_images.append(output)
 
